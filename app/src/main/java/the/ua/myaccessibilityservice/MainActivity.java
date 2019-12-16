@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         Button youTubeClick = findViewById(R.id.click);
 
         // create dialog
-        if (checkAccess()) {
+        if (!checkAccess()) {
             Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
             startActivity(intent);
         }
@@ -41,15 +42,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // [type] TYPE_VIEW_FOCUSED [class] android.widget.EditText [package] com.google.android.youtube [time] 141749610 [text] Search YouTube
     private void startApp() {
-        Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.android.messaging.ui.conversationlist");
+        PackageManager packageManager = getPackageManager();
+        Intent launchIntent = packageManager.getLaunchIntentForPackage("com.google.android.youtube");
         // Запуск из нужного места без предыстории приложения
         assert launchIntent != null;
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(launchIntent);
     }
 
-    protected boolean checkAccess() {
+    private boolean checkAccess() {
         String string = getString(R.string.accessibilityservice_id);
         for (AccessibilityServiceInfo id : ((AccessibilityManager) Objects.requireNonNull(getSystemService(Context.ACCESSIBILITY_SERVICE))).getEnabledAccessibilityServiceList(AccessibilityEvent.TYPES_ALL_MASK)) {
             if (string.equals(id.getId())) {

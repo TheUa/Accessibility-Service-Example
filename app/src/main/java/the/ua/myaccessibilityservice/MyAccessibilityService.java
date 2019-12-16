@@ -4,9 +4,19 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyAccessibilityService extends AccessibilityService {
     public MyAccessibilityService() {
@@ -42,13 +52,17 @@ public class MyAccessibilityService extends AccessibilityService {
         return sb.toString();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        Log.e(TAG, String.format(
+        Log.v(TAG, String.format(
                 "onAccessibilityEvent: [type] %s [class] %s [package] %s [time] %s [text] %s",
                 getEventType(event), event.getClassName(), event.getPackageName(),
                 event.getEventTime(), getEventText(event)));
+
+        getYouTubeVideo1(event);
     }
+
 
     @Override
     public void onInterrupt() {
@@ -67,7 +81,114 @@ public class MyAccessibilityService extends AccessibilityService {
 
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
+        info.packageNames = new String[]{"com.google.android.youtube"};
+        info.notificationTimeout = 100;
         setServiceInfo(info);
+
     }
+
+    private void getYouTubeVideo1(AccessibilityEvent event) {
+
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            if (event.getPackageName().equals("com.google.android.youtube")) {
+                AccessibilityNodeInfo currentNode = getRootInActiveWindow();
+                if (currentNode != null) {
+
+                    List<AccessibilityNodeInfo> nodeInfoList = currentNode.findAccessibilityNodeInfosByText("Введите запрос");
+                    if (nodeInfoList != null && !nodeInfoList.isEmpty()) {
+                        for (AccessibilityNodeInfo nodeInfo : nodeInfoList) {
+                            Log.e("1111", String.valueOf(nodeInfo.getContentDescription()));
+                            if (nodeInfo.getClassName().equals("android.widget.EditText")) {
+                                Log.e("Ed", (String) currentNode.getContentDescription());
+                            }
+
+                            Log.e("1111", String.valueOf(nodeInfo.getContentDescription()));
+                            Bundle arguments = new Bundle();
+                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            arguments.putString(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "Lol777");
+                            Log.e("2222", String.valueOf(nodeInfo));
+                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+                            nodeInfo.setText("fdfsdf");
+
+                        }
+
+
+                    }
+                }
+            }
+        }
+    }
+
+
+//    1 [type] TYPE_VIEW_CLICKED [class] android.widget.ImageView [package] com.google.android.youtube [time] 148154718 [text] Search
+//    2 [type] TYPE_VIEW_FOCUSED [class] android.widget.EditText [package] com.google.android.youtube [time] 148154773 [text] Search YouTube
+
+//    private void getYouTubeVideo(AccessibilityEvent event) {
+//
+//        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED){
+//            AccessibilityNodeInfo currentNode1 = getRootInActiveWindow();
+//            Log.e("!!!!", "trzm1");
+//
+//
+//            if ((currentNode1 != null) && currentNode1.getContentDescription() != null && currentNode1.getContentDescription().equals("android.widget.EditText")){
+//                Log.e("!!!!", currentNode1.toString());
+//
+//            }
+//        }
+//
+//        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+//            if (event.getPackageName().equals("com.google.android.youtube")) {
+//                AccessibilityNodeInfo currentNode = getRootInActiveWindow();
+//                if (currentNode != null)
+//
+//
+////                    if (currentNode.getContentDescription() != null && currentNode.getContentDescription().equals("android.widget.EditText")){
+////                        Log.e("!!!!", "trim");
+////                    }
+////                    && currentNode.getClassName().equals("android.widget.FrameLayout")
+////                        && currentNode.getChild(0) != null)
+////                        && currentNode.getChild(0).getClassName().equals("android.widget.ImageView "))
+////                        && currentNode.getChild(2).getContentDescription().equals("Navigate upSearch YouTubeVoice search"))
+//                {
+//
+//                    List<AccessibilityNodeInfo> nodeInfoList = currentNode.findAccessibilityNodeInfosByText("Введите запрос");
+//                    if (nodeInfoList != null && !nodeInfoList.isEmpty()) {
+//                        for (AccessibilityNodeInfo nodeInfo : nodeInfoList) {
+//
+//                            Log.e("1111", String.valueOf(nodeInfo.getContentDescription()));
+//
+//                            if (nodeInfo.getClassName().equals("android.widget.EditText")){
+//                                Log.e("Ed", (String) currentNode.getContentDescription());
+//
+//                        }
+//
+//                            Log.e("1111", String.valueOf(nodeInfo.getContentDescription()));
+//                            Bundle arguments = new Bundle();
+//                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//                            arguments.putString(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "Lol777");
+//                            Log.e("2222", String.valueOf(nodeInfo));
+//                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+//                            nodeInfo.setText("fdfsdf");
+//
+//                        }
+//
+//                    }
+//                    List<AccessibilityNodeInfo> nodeChild = currentNode.findAccessibilityNodeInfosByViewId("Поиск");
+//                    for (AccessibilityNodeInfo nodeChildInfo : nodeChild) {
+//                        Log.e("!!!!!", String.valueOf(nodeChildInfo.getContentDescription()));
+//                        Bundle arguments = new Bundle();
+////                        nodeChildInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//                        arguments.putString(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "Lol777");
+//                        Log.e("2222", String.valueOf(nodeChildInfo));
+//                        nodeChildInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+//                    }
+////                   Log.e()
+////                    currentNode.getChild(2).performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//
+//                }
+//            }
+//        }
+//
+//    }
 
 }
