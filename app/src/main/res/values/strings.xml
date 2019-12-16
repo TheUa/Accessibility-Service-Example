@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">My Accessibility Service</string>
+    <string name="accessibilityservice_id">the.ua.myaccessibilityservice/.AccessibilityService</string>
+</resources>
