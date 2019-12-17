@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // [type] TYPE_VIEW_FOCUSED [class] android.widget.EditText [package] com.google.android.youtube [time] 141749610 [text] Search YouTube
     private void startApp() {
         PackageManager packageManager = getPackageManager();
         Intent launchIntent = packageManager.getLaunchIntentForPackage("com.google.android.youtube");
