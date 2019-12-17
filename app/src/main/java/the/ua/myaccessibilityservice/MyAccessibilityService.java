@@ -2,15 +2,25 @@ package the.ua.myaccessibilityservice;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Display;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.EditText;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.core.view.accessibility.AccessibilityWindowInfoCompat;
 
 import java.util.List;
 
@@ -50,15 +60,18 @@ public class MyAccessibilityService extends AccessibilityService {
         return sb.toString();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         Log.v(TAG, String.format(
-                "onAccessibilityEvent: [type] %s [class] %s [package] %s [time] %s [text] %s" ,
+                "onAccessibilityEvent: [type] %s [class] %s [package] %s [time] %s [text] %s",
                 getEventType(event), event.getClassName(), event.getPackageName(),
                 event.getEventTime(), getEventText(event)));
         getYouTubeSearch(event);
 
+        getParseText(event);
 
+        getClickedAndBuckHome(event);
     }
 
     @Override
@@ -81,6 +94,7 @@ public class MyAccessibilityService extends AccessibilityService {
 //        info.notificationTimeout = 100;
         setServiceInfo(info);
 
+
     }
 
     private void getYouTubeSearch(AccessibilityEvent event) {
@@ -88,9 +102,14 @@ public class MyAccessibilityService extends AccessibilityService {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (event.getPackageName().equals("com.google.android.youtube")) {
                 AccessibilityNodeInfo currentNode = getRootInActiveWindow();
+
+                AccessibilityNodeInfo sourse = event.getSource();
+                if (sourse != null && event.getClassName().equals("android.widget.EditText")) {
+                    Log.e("EBAT", "V dishlo");
+                }
                 if (currentNode != null) {
 
-//                    List<AccessibilityNodeInfo> nodeInfoList = currentNode.findAccessibilityNodeInfosByText("Введите запрос");
+
                     List<AccessibilityNodeInfo> nodeInfoList =
                             currentNode.findAccessibilityNodeInfosByText("Введите запрос");
 
@@ -100,6 +119,10 @@ public class MyAccessibilityService extends AccessibilityService {
                             if (nodeInfo.getClassName().equals("android.widget.EditText")) {
                                 Log.e("Ed", (String) currentNode.getContentDescription());
                             }
+                            if (event.getClassName().equals("android.widget.EditText")) {
+                                Log.e("Ed", (String) currentNode.getContentDescription());
+                            }
+
 
                             Log.e("1111", String.valueOf(nodeInfo.getContentDescription()));
                             Bundle arguments = new Bundle();
@@ -119,4 +142,74 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void getParseText(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+            if (event.getPackageName().equals("com.google.android.youtube")) {
+
+                Log.e("EBAT", "V dishlo");
+
+                Log.e("EVENT", String.valueOf(event.getClassName()));
+                AccessibilityNodeInfo currentNodeEditText = event.getSource();
+                if (currentNodeEditText != null && event.getClassName().equals("android.widget.EditText")) {
+
+                    Bundle arguments = new Bundle();
+//                    currentNodeEditText.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    arguments.putString(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "Рандомный текст");
+                    currentNodeEditText.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+                    currentNodeEditText.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+
+
+
+                    Runnable task = new Runnable() {
+                        @RequiresApi(api = Build.VERSION_CODES.Q)
+                        @Override
+                        public void run() {
+                            Log.e("EBAT", "ЖМИ!");
+
+
+//                            currentNodeEditText.performAction(KeyEvent.KEYCODE_ENTER);
+
+                        }
+                    };
+
+                    task.run();
+                    currentNodeEditText.performAction(KeyEvent.KEYCODE_ENTER);
+
+                    currentNodeEditText.performAction(KeyEvent.KEYCODE_ENTER);
+
+//                    currentNodeEditText.performAction(KeyEvent.KEYCODE_ENTER);
+//                    AccessibilityNodeInfo clickableParent = currentNodeEditText.getParent();
+//                    clickableParent.performAction(KeyEvent.KEYCODE_ENTER);
+
+//                    if (currentNodeEditText.getText().toString().equals("Lol777")) {
+//                        //We found textview, but its not clickable, so we should perform the click on the parent
+//                        AccessibilityNodeInfo clickableParent = currentNodeEditText.getParent();
+//                        clickableParent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//                        Log.e("CL", "!!!");
+//                    }
+
+                }
+            }
+        }
+    }
+
+    private void getClickedAndBuckHome(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+            if (event.getPackageName().equals("com.google.android.youtube")) {
+                Log.e("EBAT", "V dishlo2");
+
+                AccessibilityNodeInfo currentNodeEditText = event.getSource();
+                if (currentNodeEditText != null && event.getClassName().equals("android.widget.EditText")
+                        && currentNodeEditText.getText().toString().equals("Рандомный текст")) {
+
+
+                    Log.e("EBAT", "V dishlo23SYKA");
+
+
+                }
+            }
+        }
+    }
 }
