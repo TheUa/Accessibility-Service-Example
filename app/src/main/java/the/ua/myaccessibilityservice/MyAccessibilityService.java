@@ -51,7 +51,6 @@ public class MyAccessibilityService extends AccessibilityService {
         return sb.toString();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         Log.v(TAG, String.format(
@@ -105,11 +104,13 @@ public class MyAccessibilityService extends AccessibilityService {
 //              Конечно, нужно вместо поиска по тексту использовать поиск по ссылке (findAccessibilityNodeInfosByViewId),
 //              но не получилось сразу найти необходимую ссылку, а времени к сожалению не много свободного,
 //              поэтому просто для демонстрации работоспособности оставляю так
-                List<AccessibilityNodeInfo> nodeInfoList =
-                        currentNode.findAccessibilityNodeInfosByText("Введите запрос");
-                if (nodeInfoList != null && !nodeInfoList.isEmpty()) {
-                    for (AccessibilityNodeInfo nodeInfo : nodeInfoList) {
-                        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                if (currentNode != null) {
+                    List<AccessibilityNodeInfo> nodeInfoList =
+                            currentNode.findAccessibilityNodeInfosByText("Введите запрос");
+                    if (nodeInfoList != null && !nodeInfoList.isEmpty()) {
+                        for (AccessibilityNodeInfo nodeInfo : nodeInfoList) {
+                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                        }
                     }
                 }
             }
