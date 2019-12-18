@@ -1,8 +1,5 @@
 package the.ua.myaccessibilityservice;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.Intent;
@@ -10,12 +7,12 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.List;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,13 +23,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button youTubeClick = findViewById(R.id.click);
+        Button settingClick = findViewById(R.id.setting);
 
-        // create dialog
-        if (!checkAccess()) {
-            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            startActivity(intent);
+        String myAccessibilityService = getString(R.string.accessibilityservice_id);
+
+        if (!isAccessibilityServiceEnabled(this, myAccessibilityService)) {
+            settingIntent();
         }
-
         youTubeClick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -40,25 +37,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        settingClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                settingIntent();
+            }
+        });
+
     }
 
-    // [type] TYPE_VIEW_FOCUSED [class] android.widget.EditText [package] com.google.android.youtube [time] 141749610 [text] Search YouTube
     private void startApp() {
         PackageManager packageManager = getPackageManager();
         Intent launchIntent = packageManager.getLaunchIntentForPackage("com.google.android.youtube");
-        // Запуск из нужного места без предыстории приложения
         assert launchIntent != null;
-        launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(launchIntent);
     }
 
-    private boolean checkAccess() {
-        String string = getString(R.string.accessibilityservice_id);
-        for (AccessibilityServiceInfo id : ((AccessibilityManager) Objects.requireNonNull(getSystemService(Context.ACCESSIBILITY_SERVICE))).getEnabledAccessibilityServiceList(AccessibilityEvent.TYPES_ALL_MASK)) {
-            if (string.equals(id.getId())) {
+    public static boolean isAccessibilityServiceEnabled(Context context, String serviceName) {
+        AccessibilityManager accessibilityManager = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        assert accessibilityManager != null;
+        List<AccessibilityServiceInfo> accessibilityServices = accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
+        for (AccessibilityServiceInfo info : accessibilityServices) {
+            if (info.getId().equals(serviceName)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private void settingIntent() {
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        startActivity(intent);
     }
 }
